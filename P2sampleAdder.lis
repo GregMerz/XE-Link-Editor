@@ -1,4 +1,4 @@
-0000    ADD      START    0      
+0000    ADD      START    0
 0000             EXTDEF   COUNT,TABLE,TABLE2
 0000             EXTREF   LEN
 0000    FIRST    LDX     #10                       05000A
@@ -16,5 +16,5 @@
 0023    TABLE    RESW     2000
 07F3    TABLE2   RESW     2000
 0FC3    TOTAL    RESW     1
-                 END      ADD
+        END      ADD
 0FC6    *       =C'EOF'                            454F46
