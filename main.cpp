@@ -19,8 +19,11 @@ int main(int argc, char **argv)
     addresses = new string[20];
     ifstream myfile("P2sampleAdder.lis");
 
-    if (myfile.is_open())
+    if (!myfile.is_open())
     {
+       cout << "Unable to open file" << endl; 
+    }else{
+        
         int idx = 0;
         char *address;
 
@@ -42,9 +45,7 @@ int main(int argc, char **argv)
             cout << addresses[i] << endl;
         }
         myfile.close();
-    }else
-    {
-        cout << "Unable to open file";
     }
+    
     return 0;
 }
