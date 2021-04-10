@@ -16,7 +16,6 @@ int main(int argc, char **argv)
     }
     else
     {
-
         int idx = 0;
         string address;
 
