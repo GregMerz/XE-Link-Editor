@@ -1,9 +1,18 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <map>
 using namespace std;
 
-void recordInfo(int startIdx, int endIdx, char* info, char *data)
+map<string, string> symTab;
+void getSymbol(int startIdx, string data){
+    string delimiter = " ";
+    string symbol = data.substr(startIdx, data.find(delimiter)+4);
+    //Strip string if do use.
+    //cout << symbol << endl;
+}
+
+void recordInfo(int startIdx, int endIdx, char *info, char *data)
 {   
     for (int i = startIdx; i < endIdx; i++)
     {
@@ -16,7 +25,9 @@ int main(int argc, char **argv)
 {
     char line[80];
     string *addresses;
+    string *symbols;
     addresses = new string[20];
+    symbols = new string[20];
     ifstream myfile("P2sampleAdder.lis");
 
     if (!myfile.is_open())
@@ -26,24 +37,27 @@ int main(int argc, char **argv)
         
         int idx = 0;
         char *address;
+        char* symbol;
 
-        // Get 80 bytes of the line and place into variable called "line"
-        // Then get the first four bytes of the line 
-        // and place into an array of strings called "Address"
-        // Then place that address into addresses
+        // Get addresses and symbols and place them into symTab<string,string>
         while (myfile.getline(line, 80))
         {
             address = new char[4];
-            recordInfo(0, 4, address, line);             // Is this going to be one pass or two?
-            addresses[idx] = address;           
+            symbol = new char[10];
+            recordInfo(0, 4, address, line);    
+            getSymbol(8, line);
+            recordInfo(8,16, symbol, line);
+            addresses[idx] = address;
+            symbols[idx] = symbol;  
+            symTab.insert(pair<string,string>(symbol,address)); //Book says error flahs?         
             idx++;                                     
         }
         
         //Print for debugging
-        for (int i = 0; i < 20; i++)
-        {
-            cout << addresses[i] << endl;
-        }
+        // for (int i = 0; i < 20; i++)
+        // {
+        //     cout << symbols[i] << endl;
+        // }
         myfile.close();
     }
     
