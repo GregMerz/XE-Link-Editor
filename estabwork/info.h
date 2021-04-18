@@ -8,13 +8,14 @@ using namespace std;
 class Info{
     public:
         string name;
-        int length; 
-        int address;
+        string length; 
+        string address;
 
-        Info(string n, int addr = 0, int l = 0);
+        Info(string n, string addr = "-1", string l = "-1");
         void PrintSymbolMap();
-        void PutIntoSymbolMap(string symbolName, int address);
+        void PutIntoSymbolMap(string symbolName, string address);
+        void WriteSymbolMap();
     private:
-        map<string,int> symMap;
+        map<string,string> symMap;
 };
 #endif
