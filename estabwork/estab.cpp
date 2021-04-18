@@ -22,6 +22,8 @@ Estab::Estab(string name, string address, string length){
 }
 
 void Estab::PutIntoEstab(string name, string symbolName, string address, string length){
+    symbolName = symbolName.append(6 - symbolName.size(), ' ');
+
     //If not in map, place
     if(hmap.find(name) == hmap.end()){
         Info in(name, address, length);
@@ -30,8 +32,9 @@ void Estab::PutIntoEstab(string name, string symbolName, string address, string 
         info = &in;
     }
     
+    
     //At this point the control section name is inserted
-    if(symbolName != ""){
+    if(symbolName != "      "){
         PutIntoSymbolMap(name, symbolName, address);
     }
 }
@@ -70,9 +73,6 @@ void Estab::PrintEstab(){
         cout << setw(42) << setfill(' ') << infocurr.address;
         cout << setw(18) << setfill(' ') << infocurr.length << endl;
 
-        
-        
-        
         infocurr.PrintSymbolMap();
     }
 

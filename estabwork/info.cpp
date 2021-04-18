@@ -24,7 +24,7 @@ void Info::PrintSymbolMap(){
     for(symbols curr: vectorMap){
         //curr.name.insert(curr.name.begin(), 6 - curr.name.length(), ' ');
         cout << "                      " << curr.name;
-        cout << "                " << curr.location << endl;
+        cout << "               " << curr.location << endl;
     }
 
     // for (auto const& x : symMap)

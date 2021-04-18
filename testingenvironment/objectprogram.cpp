@@ -9,7 +9,7 @@
 using namespace std;
 
 ObjectProgram::ObjectProgram(string name, string address, string length){
-    //Append spaces to name to make name equal to 7 characters
+    //Append spaces to the END name to make name equal to 7 characters
     control_section_name = name.append(6 - name.size(), ' ');
 
     //Insert 0s in the beginning of string to make equal to length of six
