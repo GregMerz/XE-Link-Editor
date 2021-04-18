@@ -1,5 +1,5 @@
 0000    ADD      START    0
-0000             EXTDEF   COUNT,TABLE,TABLE2
+0000             EXTDEF   COUNT,TABLE,TABLE2456789
 0000             EXTREF   LEN
 0000    FIRST    LDX     #10                       05000A
 0003             LDA     #0                        010000

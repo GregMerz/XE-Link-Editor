@@ -15,9 +15,14 @@ string getInfo(int startIdx, string data){
 
 void recordInfo(int startIdx, int endIdx, char *info, char *data)
 {   
-    for (int i = startIdx; i < endIdx; i++)
+    info[0] = data[startIdx];
+    for (int i = startIdx + 1; i < endIdx; i++)
     {
-        info[i - startIdx] = data[i];
+        if(!isspace(data[i]))
+            info[i - startIdx] = data[i];
+        else
+            break;
+        
     }
     info[endIdx] = 0;
 }
@@ -62,15 +67,15 @@ int main(int argc, char **argv)
             recordInfo(8, 16, symbol, line);
             //recordInfo(16, 25, opcode,line);      //<---------------------------- Can't get this working for some reason
             opcode = &getInfo(16, line)[0];
-            recordInfo(25, 48, argument, line);
+            recordInfo(25, 51, argument, line);
             //argument = &getInfo(20, line)[0];
-            //recordInfo(49, 57, objectCode, line);
+            recordInfo(49, 57, objectCode, line);
             //objectCode = &getInfo(27, line)[0];
             addresses[idx] = address;
             symbols[idx] = symbol;
             opcodes[idx] = opcode;  
             arguments[idx] = argument;
-            //objectCodes[idx] = objectCode;
+            objectCodes[idx] = objectCode;
             symTab.insert(pair<string,string>(symbol,address)); //Book says error flags?         
             idx++;                                     
         }
@@ -78,7 +83,7 @@ int main(int argc, char **argv)
         //Print for debugging
         for (int i = 0; i < 20; i++)
         {
-            cout << arguments[i] << endl;
+            cout << objectCodes[i] << endl;
         }
         myfile.close();
     }

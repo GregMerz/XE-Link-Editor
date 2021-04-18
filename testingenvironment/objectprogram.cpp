@@ -36,7 +36,6 @@ void ObjectProgram::SetLength(string length){
 }
 
 void ObjectProgram::AddTextRecord(string starting, string entryaddress ,string length){
-
     if(TextRecordMap.find(starting) == TextRecordMap.end()){
         //If starting doesn't exist
         //Insert a new TextRecord
