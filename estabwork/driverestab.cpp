@@ -11,6 +11,8 @@ int main(){
     
     estab.PutIntoEstab("ProgB", "", "4063", "67");
     estab.PutIntoEstab("ProgB", "ListB", "4099");
+    estab.PutIntoEstab("ProgA", "ENDA", "406C");
+    estab.PutIntoEstab("ProgA", "ENDABC", "4077");
 
     estab.PrintEstab();
     estab.WriteEstab();

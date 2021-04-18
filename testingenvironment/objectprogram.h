@@ -19,6 +19,7 @@ class ObjectProgram{
         void WriteToFile(string filename, string line = "-1", string action = "-1");
         void AddEXTDEF(string name, string loc);
         void AddEXTREF(string name);
+        void SetLength(string length);
 
         struct EXTDEF{
             string name;

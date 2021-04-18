@@ -8,7 +8,7 @@
 
 using namespace std;
 
-ObjectProgram::ObjectProgram(string name, string address, string size){
+ObjectProgram::ObjectProgram(string name, string address, string length){
     //Append spaces to name to make name equal to 7 characters
     control_section_name = name.append(6 - name.size(), ' ');
 
@@ -17,18 +17,22 @@ ObjectProgram::ObjectProgram(string name, string address, string size){
     control_section_address = address;
 
     //Insert 0s in the beginning of string to make equal to length of six
-    size.insert(size.begin(), 6 - size.length(), '0');
-    control_section_size = size;
-
-    //EXDEF and EXREF should be in estab by now, when ready get from there.
+    length.insert(length.begin(), 6 - length.length(), '0');
+    control_section_size = length;
 }
 
+// We can also get information from file.
 void ObjectProgram::AddEXTDEF(string name, string loc){
     vectorEXTDEF.push_back(EXTDEF(name, loc));
 }
 
 void ObjectProgram::AddEXTREF(string name){
     vectorEXTREF.push_back(name.append(6 - name.size(), ' '));
+}
+
+void ObjectProgram::SetLength(string length){
+    length.insert(length.begin(), 6 - length.length(), '0');
+    control_section_size = length;
 }
 
 void ObjectProgram::WriteToFile(string filename, string line, string action){

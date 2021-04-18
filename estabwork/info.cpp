@@ -1,11 +1,14 @@
 #include <map>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
+#include <vector>
 #include "info.h"
 
 using namespace std;
 
 map<string,string> symMap;
+
 Info::Info(string n, string addr, string l){
     name = n;
     address = addr;
@@ -13,15 +16,22 @@ Info::Info(string n, string addr, string l){
 }
 
 void Info::PutIntoSymbolMap(string symbolName, string address){
-    symMap.insert(pair<string, string>(symbolName, address));
+    vectorMap.push_back(symbols(symbolName, address));
 }
 
 void Info::PrintSymbolMap(){
-    for (auto const& x : symMap)
-    {
-        std::cout <<"                      " << x.first  // string (key)
-                << "                " << x.second << endl;
+
+    for(symbols curr: vectorMap){
+        //curr.name.insert(curr.name.begin(), 6 - curr.name.length(), ' ');
+        cout << "                      " << curr.name;
+        cout << "                " << curr.location << endl;
     }
+
+    // for (auto const& x : symMap)
+    // {
+    //     cout << setw(27) << setfill(' ')  << x.first;  // string (key)
+    //     cout << setw(20) << setfill(' ')  << x.second << endl;
+    // }
 }
 
 void Info::WriteSymbolMap(){
@@ -29,8 +39,8 @@ void Info::WriteSymbolMap(){
     myfile.open("name.st", ios::app);
     for (auto const& x : symMap)
     {
-        myfile <<"                      " << x.first  // string (key)
-               << "                " << x.second << endl;
+        myfile << setw(27) << setfill(' ')   << x.first  // string (key)
+               << setw(20) << setfill(' ')   << x.second << endl;
     }
     myfile.close();
 }

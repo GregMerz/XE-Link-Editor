@@ -13,7 +13,9 @@ int main(){
     obj.AddEXTREF("ENDB");
     obj.AddEXTREF("LISTC");
     obj.AddEXTREF("ENDC");
+    obj.SetLength("7F");
     obj.WriteToFile("testfile.txt");
+    
     
     return 1;
 }

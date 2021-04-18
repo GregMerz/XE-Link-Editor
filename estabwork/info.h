@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 using namespace std;
 class Info{
@@ -15,6 +16,22 @@ class Info{
         void PrintSymbolMap();
         void PutIntoSymbolMap(string symbolName, string address);
         void WriteSymbolMap();
+
+        struct symbols{
+            string name;
+            string location;
+
+            symbols(string n, string loc){
+                // name = n.append(6 - n.size(), ' ');
+                // loc.insert(loc.begin(), 6 - loc.length(), '0');
+                // location = loc;
+
+                name = n;
+                location = loc;
+            }
+        };
+
+        vector<symbols> vectorMap;
     private:
         map<string,string> symMap;
 };
