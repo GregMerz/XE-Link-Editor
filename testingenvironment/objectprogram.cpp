@@ -35,6 +35,33 @@ void ObjectProgram::SetLength(string length){
     control_section_size = length;
 }
 
+void ObjectProgram::AddTextRecord(string starting, string entryaddress ,string length){
+
+    if(TextRecordMap.find(starting) == TextRecordMap.end()){
+        //If starting doesn't exist
+        //Insert a new TextRecord
+        TextRecordMap.insert(pair<string, TextRecord>(starting,TextRecord(starting, length)));
+        TextRecordsVector.push_back(starting);
+    }
+
+    if(entryaddress != "-1"){
+            // Place into TextRecord struct list.
+            TextRecord* curr = &TextRecordMap.at(starting);
+            curr->AddAddressToTextRecord(entryaddress);
+    }
+    
+}
+
+void ObjectProgram::SetTextRecordLength(string start, string length){
+    if(TextRecordMap.find(start) == TextRecordMap.end()){
+        cout << "There is no text record by that name yet!\n";
+        return;
+    }else{
+        TextRecord* curr = &TextRecordMap.at(start);
+        curr->SetTextRecordLength(length);
+    }
+}
+
 void ObjectProgram::WriteToFile(string filename, string line, string action){
     char carrot = '^';
     ofstream myfile;
@@ -52,6 +79,31 @@ void ObjectProgram::WriteToFile(string filename, string line, string action){
     for(string curr: vectorEXTREF){
         myfile << carrot << curr;
     }
+
+    //Text Record order is in Vector
+    //Text Recrod Information is in Map
+    for(string curr: TextRecordsVector){
+        TextRecord* trInfo = &(TextRecordMap.at(curr));
+        myfile << "\nT";
+        myfile << carrot << trInfo->startingAddress;
+        myfile << carrot << trInfo->size;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////Printing for debugging purposes
+        cout << "\nT";
+        cout << carrot << trInfo->startingAddress;
+        cout << carrot << trInfo->size;
+        trInfo->showlist();
+        
+////////Printing for debugging purposes
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //Print out line to file
+        list<string> :: iterator it;
+        for(it = trInfo->AddressesInTextRecords.begin(); it != trInfo->AddressesInTextRecords.end(); ++it)
+            myfile << '^' << *it;
+    }
+    cout << "\n";
     
     myfile.close();
 }

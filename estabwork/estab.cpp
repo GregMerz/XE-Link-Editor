@@ -34,6 +34,7 @@ void Estab::PutIntoEstab(string name, string symbolName, string address, string 
     
     
     //At this point the control section name is inserted
+    //Extra space in check since I am appending
     if(symbolName != "      "){
         PutIntoSymbolMap(name, symbolName, address);
     }
