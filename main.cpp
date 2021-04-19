@@ -49,6 +49,7 @@ int ConvertToInt(string address){
     return x;
 }
 
+//Add to text record
 void AddTR(string* objectCodes,string* addresses ,set<int> s1, string progname){
     ObjectProgram obj;
     obj.control_section_name = progname;
@@ -60,6 +61,7 @@ void AddTR(string* objectCodes,string* addresses ,set<int> s1, string progname){
     bool isTooManyCharacters = false;
     int length;
 
+    //Iterate through parsed object codes
     set<int>::iterator itr;
     for (itr = s1.begin(); itr != s1.end(); itr++)
     {
@@ -72,24 +74,19 @@ void AddTR(string* objectCodes,string* addresses ,set<int> s1, string progname){
                 
         }
 
+        //If it is going to overflow
         if((charactercount + objectCodes[*itr].size()) > 60){
-            //cout << charactercount + objectCodes[*itr + 1].size() << endl;
-            //cout << "We made it";
             isTooManyCharacters = true;
         }
 
         if(isTooManyCharacters || charactercount >= 55){
-            //Add currentlinecharactercount/2 + address
-            // cout << charactercount/2 << endl;
+            //Set length of text record
             obj.SetTextRecordLength(currenttextrecord, ConvertToHexString(charactercount/2));
-            cout << charactercount/2 << endl;
-            cout << ConvertToHexString(charactercount/2) << endl;
-            
-            int addressValue = ConvertToInt(currenttextrecord);
-            
+
+            int addressValue = ConvertToInt(currenttextrecord); 
             int nextAddressInteger = addressValue + charactercount/2;
 
-            //Set new current
+            //Set and start new current text record
             currenttextrecord = ConvertToHexString(nextAddressInteger);
             charactercount = 0;
             isTooManyCharacters = false;
@@ -98,12 +95,11 @@ void AddTR(string* objectCodes,string* addresses ,set<int> s1, string progname){
 
         obj.AddTextRecord(currenttextrecord, objectCodes[*itr]);
         charactercount += objectCodes[*itr].size();
-        cout << charactercount << endl;
     }
     
     obj.SetTextRecordLength(currenttextrecord, ConvertToHexString(charactercount/2));
-    string filename = progname + "objectlisting.txt";
-    obj.SetLength("FFF");
+    string filename = progname + "objectlisting.obj";
+    obj.SetLength("FFFFF");
     obj.WriteToFile(filename);
 }
 
@@ -336,22 +332,7 @@ int main(int argc, char **argv)
 
         obj.WriteToFile("test.obj");
 
-        // //Print for debugging
-        // for (int i = 0; i < 20; i++)
-        // {
-        //     cout << objectCodes[i] << endl;
-        // }
-
-        // set<int, greater<int> >::iterator itr;
-        // for (itr = s1.begin(); itr != s1.end(); itr++)
-        // {
-        //     cout << *itr<<" ";
-        // }
-
         AddTR(objectCodes,addresses , s1, symbols[0]);
-
-        cout << endl;
-
         myfile.close();
     }
 

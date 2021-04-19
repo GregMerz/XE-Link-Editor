@@ -134,6 +134,5 @@ void ObjectProgram::WriteToFile(string filename, string line, string action)
         }
         myfile << "\nM^" << curr.address << carrot << str << carrot << curr.sign << curr.symbol;
     }
-    cout << "\n";
     myfile.close();
 }
