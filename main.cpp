@@ -9,8 +9,6 @@ map<string, string> symTab; //<----------------- Add Flags
 string getInfo(int startIdx, string data){
     string delimiter = " ";
     string info = data.substr(startIdx, data.find(delimiter)+4); //4 for 4 bytes? string or char?
-    //Strip string if do use.
-    //cout << info << endl;
     return info;
 }
 

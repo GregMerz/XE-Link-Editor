@@ -16,8 +16,6 @@ class ObjectProgram{
         string control_section_size;
         vector<string> lines;
         
-        
-
         ObjectProgram(string name, string address, string size = "-1");
 
         void WriteToFile(string filename, string line = "-1", string action = "-1");
