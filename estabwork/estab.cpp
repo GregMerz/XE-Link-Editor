@@ -76,14 +76,4 @@ void Estab::PrintEstab(){
 
         infocurr.PrintSymbolMap();
     }
-
-    // for (auto const& x : hmap)
-    // {
-    //     Info infocurr = x.second;
-    //     cout << x.first;
-    //     cout << setw(42) << setfill(' ') << infocurr.address;
-    //     cout << setw(18) << setfill(' ') << infocurr.length << endl;
-        
-    //     infocurr.PrintSymbolMap();
-    // }
 }

@@ -61,6 +61,10 @@ void ObjectProgram::SetTextRecordLength(string start, string length){
     }
 }
 
+void ObjectProgram::AddModificationRecord(string symbol, string address, string sign, int format){
+    ModificationRecordList.push_back(ModificationRecord(symbol, address, format, sign));
+}
+
 void ObjectProgram::WriteToFile(string filename, string line, string action){
     char carrot = '^';
     ofstream myfile;
@@ -102,7 +106,17 @@ void ObjectProgram::WriteToFile(string filename, string line, string action){
         for(it = trInfo->AddressesInTextRecords.begin(); it != trInfo->AddressesInTextRecords.end(); ++it)
             myfile << '^' << *it;
     }
+    //Print Modification Records
+    for (const ModificationRecord & curr : ModificationRecordList)
+    {
+        string str;
+        if(curr.format == 3){
+            str = "06";
+        }else{
+            str = "05";
+        }
+        myfile << "\nM^" << curr.address << carrot << str << carrot << curr.sign << curr.symbol;
+    }
     cout << "\n";
-    
     myfile.close();
 }

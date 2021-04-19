@@ -5,6 +5,7 @@
 using namespace std;
 
 map<string, string> symTab; //<----------------- Add Flags
+
 string getInfo(int startIdx, string data){
     string delimiter = " ";
     string info = data.substr(startIdx, data.find(delimiter)+4); //4 for 4 bytes? string or char?
@@ -27,6 +28,7 @@ void recordInfo(int startIdx, int endIdx, char *info, char *data)
     info[endIdx] = 0;
 }
 
+// One variable we should get is the externaldef, extref, 
 int main(int argc, char **argv)
 {
     char line[80];
@@ -76,7 +78,7 @@ int main(int argc, char **argv)
             opcodes[idx] = opcode;  
             arguments[idx] = argument;
             objectCodes[idx] = objectCode;
-            symTab.insert(pair<string,string>(symbol,address)); //Book says error flags?         
+            symTab.insert(pair<string, string>(symbol,address)); //Book says error flags?         
             idx++;                                     
         }
         

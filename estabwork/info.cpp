@@ -20,27 +20,18 @@ void Info::PutIntoSymbolMap(string symbolName, string address){
 }
 
 void Info::PrintSymbolMap(){
-
     for(symbols curr: vectorMap){
-        //curr.name.insert(curr.name.begin(), 6 - curr.name.length(), ' ');
         cout << "                      " << curr.name;
         cout << "               " << curr.location << endl;
     }
-
-    // for (auto const& x : symMap)
-    // {
-    //     cout << setw(27) << setfill(' ')  << x.first;  // string (key)
-    //     cout << setw(20) << setfill(' ')  << x.second << endl;
-    // }
 }
 
 void Info::WriteSymbolMap(){
     ofstream myfile;
     myfile.open("name.st", ios::app);
-    for (auto const& x : symMap)
-    {
-        myfile << setw(27) << setfill(' ')   << x.first  // string (key)
-               << setw(20) << setfill(' ')   << x.second << endl;
+    for(symbols curr: vectorMap){
+        myfile << "                      " << curr.name;
+        myfile << "               " << curr.location << endl;
     }
     myfile.close();
 }
