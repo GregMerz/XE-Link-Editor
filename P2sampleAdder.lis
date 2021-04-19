@@ -12,7 +12,7 @@
 0016            +STA      TOTAL                    0F100FC3
 001A             LDT      TOTAL                    772FA6
 001D    WLEN     LDA      LEN                      032000
-0020    COUNT    WORD     10
+0020    COUNT    WORD     10                       
 0023    TABLE    RESW     2000
 07F3    TABLE2   RESW     2000
 0FC3    TOTAL    RESW     1
