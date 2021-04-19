@@ -21,20 +21,23 @@ ObjectProgram::ObjectProgram(string name, string address, string length){
     control_section_size = length;
 }
 
-// We can also get information from file.
+// Add EXTDEF to Object Program, vector of objects with name and location
 void ObjectProgram::AddEXTDEF(string name, string loc){
     vectorEXTDEF.push_back(EXTDEF(name, loc));
 }
 
+//Add EXTREF to Object Program, vector
 void ObjectProgram::AddEXTREF(string name){
     vectorEXTREF.push_back(name.append(6 - name.size(), ' '));
 }
 
+//Set the length of the Object Program
 void ObjectProgram::SetLength(string length){
     length.insert(length.begin(), 6 - length.length(), '0');
     control_section_size = length;
 }
 
+//Add new Text Record
 void ObjectProgram::AddTextRecord(string starting, string entryaddress ,string length){
     if(TextRecordMap.find(starting) == TextRecordMap.end()){
         //If starting doesn't exist
@@ -59,6 +62,10 @@ void ObjectProgram::SetTextRecordLength(string start, string length){
         TextRecord* curr = &TextRecordMap.at(start);
         curr->SetTextRecordLength(length);
     }
+}
+
+void ObjectProgram::AddModificationRecord(string symbol, string address, string sign, int format){
+    ModificationRecordList.push_back(ModificationRecord(symbol, address, format, sign));
 }
 
 void ObjectProgram::WriteToFile(string filename, string line, string action){
@@ -87,22 +94,33 @@ void ObjectProgram::WriteToFile(string filename, string line, string action){
         myfile << carrot << trInfo->startingAddress;
         myfile << carrot << trInfo->size;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////Printing for debugging purposes
-        cout << "\nT";
-        cout << carrot << trInfo->startingAddress;
-        cout << carrot << trInfo->size;
-        trInfo->showlist();
-        
-////////Printing for debugging purposes
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ////////Printing for debugging purposes
+//         cout << "\nT";
+//         cout << carrot << trInfo->startingAddress;
+//         cout << carrot << trInfo->size;
+//         trInfo->showlist();
+
+// ////////Printing for debugging purposes
+// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         //Print out line to file
         list<string> :: iterator it;
         for(it = trInfo->AddressesInTextRecords.begin(); it != trInfo->AddressesInTextRecords.end(); ++it)
             myfile << '^' << *it;
     }
-    cout << "\n";
     
+    //Print Modification Records
+    for (const ModificationRecord & curr : ModificationRecordList)
+    {
+        string str;
+        if(curr.format == 3){
+            str = "06";
+        }else{
+            str = "05";
+        }
+        myfile << "\nM^" << curr.address << carrot << str << carrot << curr.sign << curr.symbol;
+    }
+    cout << "\n";
     myfile.close();
 }

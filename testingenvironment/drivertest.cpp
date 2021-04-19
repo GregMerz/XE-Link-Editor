@@ -30,6 +30,9 @@ int main(){
     obj.AddTextRecord("2000","482039");
     obj.AddTextRecord("2000","001036");
 
+    obj.AddModificationRecord("ListB", "000024", "+", 4);
+    obj.AddModificationRecord("ListC", "00054", "+", 3);
+
     obj.WriteToFile("testfile.txt");
     
     return 1;
