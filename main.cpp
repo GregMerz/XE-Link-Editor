@@ -9,6 +9,7 @@
 
 #include "estab.h"
 #include "objectprogram.h"
+#include "info.h"
 
 using namespace std;
 

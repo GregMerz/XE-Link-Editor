@@ -1,0 +1,14 @@
+00000   CSONE    START    0
+00000            EXTDEF   LEN,ARRAY
+00000            EXTREF   TEMP
+00000           +LDA     #F+LEN                    0110000F
+00004            STA      ARRAY                    0F200C
+00007   LEN      BYTE     X’64’                    000064
+00008            LDA      LEN                      032FFC 
+0000B            LDS      ARRAY                    6F2005
+0000E            ADDR     S,A                      9040
+00010            STA     @TEMP                     0E2064
+00013   ARRAY    RESB     100
+00077            CLEAR    0                        B40000    
+                 END   
+0029    *       =C'EOF'                            454F46
