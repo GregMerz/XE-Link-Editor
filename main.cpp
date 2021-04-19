@@ -3,6 +3,9 @@
 #include <string.h>
 #include <map>
 #include <unordered_map>
+#include <set>
+#include "estab.h"
+#include "objectprogram.h"
 using namespace std;
 
 map<string, string> symTab; //<----------------- Add Flags
@@ -10,8 +13,6 @@ string getInfo(int startIdx, string data)
 {
     string delimiter = " ";
     string info = data.substr(startIdx, data.find(delimiter) + 4); //4 for 4 bytes? string or char?
-    //Strip string if do use.
-    //cout << info << endl;
     return info;
 }
 
@@ -26,6 +27,13 @@ void recordInfo(int startIdx, int endIdx, char *info, char *data)
             break;
     }
     info[endIdx] = 0;
+}
+
+void AddTR(string* objectCodes,string* addresses ,set<int> s1, string progname){
+    ObjectProgram obj(progname, addresses[*s1.begin()]);
+    
+    //for()
+
 }
 
 int main(int argc, char **argv)
@@ -43,6 +51,7 @@ int main(int argc, char **argv)
     opcodes = new string[20];
     arguments = new string[20];
     objectCodes = new string[20];
+    set<int> s1;
     ifstream myfile("P2sampleAdder.lis");
 
     if (!myfile.is_open())
@@ -111,10 +120,12 @@ int main(int argc, char **argv)
                     argumentCounter++;
                 }
 
-                if (idx > 50 && idx < 57)
+                if (idx > 50 && idx < 59)
                 {
-                    objectCode[idx - 49] = line[idx];
+                    //objectCode[idx - 49] = line[idx];
+                    objectCode = &getInfo(51, line)[0];
                     objectCounter++;
+                    //s1.insert(lineIdx);
                 }
 
                 idx++;
@@ -187,37 +198,31 @@ int main(int argc, char **argv)
                     }
                 }
             }
-
-            /*
-            address = new char[4];
-            symbol = new char[10];
-            opcode = new char[10];
-            argument = new char[24];
-            objectCode = new char[9];
-            recordInfo(0, 4, address, line);
-            //getSymbol(8, line);
-            recordInfo(8, 16, symbol, line);
-            //recordInfo(16, 25, opcode,line);      //<---------------------------- Can't get this working for some reason
-            opcode = &getInfo(16, line)[0];
-            recordInfo(25, 51, argument, line);
-            //argument = &getInfo(20, line)[0];
-            recordInfo(49, 57, objectCode, line);
-            //objectCode = &getInfo(27, line)[0];
-            */
             addresses[lineIdx] = address;
             symbols[lineIdx] = symbol;
             opcodes[lineIdx] = opcode;
             arguments[lineIdx] = argument;
             objectCodes[lineIdx] = objectCode;
-            symTab.insert(pair<string, string>(symbol, address)); //Book says error flags?
+
+            symTab.insert(pair<string, string>(symbol, address)); //Book says error flags
             lineIdx++;
         }
 
         //Print for debugging
         for (int i = 0; i < 20; i++)
         {
-            cout << addresses[i] << " " << symbols[i] << " " << opcodes[i] << " " << arguments[i] << " " << objectCodes[i] << endl;
+            cout << objectCodes[i] << endl;
         }
+
+        set<int, greater<int> >::iterator itr;
+        for (itr = s1.begin(); itr != s1.end(); itr++)
+        {
+            cout << *itr<<" ";
+        }
+
+        AddTR(objectCodes,addresses , s1, symbols[0]);
+
+        cout << endl;
 
         myfile.close();
     }
