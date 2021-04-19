@@ -8,7 +8,11 @@
                 "-g",
                 "${file}",
                 "-o",
+<<<<<<< HEAD
                 "${fileDirname}/${fileBasenameNoExtension}"
+=======
+                "${fileDirname}\\${fileBasenameNoExtension}"
+>>>>>>> dc1b9b540ab8dcf5167c9eac004ec34db1a03298
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
