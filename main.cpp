@@ -240,7 +240,7 @@ int main(int argc, char **argv)
                         {
                             if (index != string::npos)
                             {
-                                if (index == 0 || argument[index - 1] == '+')
+                                if (index == 0 || argument[index - 1] == '+' || argument[index - 1] == '#')
                                 {
                                     obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
                                 }
@@ -260,7 +260,7 @@ int main(int argc, char **argv)
                         {
                             if (index != string::npos)
                             {
-                                if (index == 0 || argument[index - 1] == '+')
+                                if (index == 0 || argument[index - 1] == '+' || argument[index - 1] == '#')
                                 {
                                     obj.AddModificationRecord(headerName, address, "+", objectCode.size() / 2);
                                 }
@@ -277,6 +277,9 @@ int main(int argc, char **argv)
             // If opcode is not START, EXTDEF, or EXTREF, check for extref for modification records
             else
             {
+                
+
+                // Checking extref in text record space
                 for (auto &[key, value] : extMap)
                 {
                     if (value == 'R')
