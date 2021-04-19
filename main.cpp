@@ -3,6 +3,9 @@
 #include <string.h>
 #include <map>
 #include <unordered_map>
+#include <set>
+#include <sstream>
+#include "estab.h"
 
 #include "objectprogram.h"
 
@@ -13,22 +16,79 @@ string getInfo(int startIdx, string data)
 {
     string delimiter = " ";
     string info = data.substr(startIdx, data.find(delimiter) + 4); //4 for 4 bytes? string or char?
-    //Strip string if do use.
-    //cout << info << endl;
     return info;
 }
 
-void recordInfo(int startIdx, int endIdx, char *info, char *data)
+string ConvertToHexString(int address)
 {
-    info[0] = data[startIdx];
-    for (int i = startIdx + 1; i < endIdx; i++)
+    stringstream stream;
+    stream << hex << address;
+    string result(stream.str());
+    for (auto &c : result)
+        c = toupper(c);
+    return result;
+}
+
+int ConvertToInt(string address)
+{
+    int x;
+    stringstream ss;
+    ss << hex << address;
+    ss >> x;
+
+    return x;
+}
+
+void AddTR(string *objectCodes, string *addresses, set<int> s1, string progname, ObjectProgram *obj)
+{
+    string currenttextrecord = "-1";
+    int currentlinecharactercount = 0;
+    int charactercount = 0;
+    bool isTooManyCharacters = false;
+    int length;
+
+    set<int>::iterator itr;
+    for (itr = s1.begin(); itr != s1.end(); itr++)
     {
-        if (!isspace(data[i]))
-            info[i - startIdx] = data[i];
-        else
-            break;
+        //start text record
+        if (charactercount == 0)
+        {
+            if (currenttextrecord == "-1")
+            {
+                currenttextrecord = addresses[*itr];
+                obj->AddTextRecord(currenttextrecord);
+            }
+        }
+
+        if ((charactercount + objectCodes[*itr].size()) > 60)
+        {
+            isTooManyCharacters = true;
+        }
+
+        if (isTooManyCharacters || charactercount >= 55)
+        {
+            //Add currentlinecharactercount/2 + address
+            obj->SetTextRecordLength(currenttextrecord, ConvertToHexString(charactercount / 2));
+
+            int addressValue = ConvertToInt(currenttextrecord);
+
+            int nextAddressInteger = addressValue + charactercount / 2;
+
+            //Set new current
+            currenttextrecord = ConvertToHexString(nextAddressInteger);
+            charactercount = 0;
+            isTooManyCharacters = false;
+            obj->AddTextRecord(currenttextrecord);
+        }
+
+        obj->AddTextRecord(currenttextrecord, objectCodes[*itr]);
+        charactercount += objectCodes[*itr].size();
     }
-    info[endIdx] = 0;
+
+    obj->SetTextRecordLength(currenttextrecord, ConvertToHexString(charactercount / 2));
+    // string filename = progname + "objectlisting.txt";
+    // obj.SetLength("FFF");
+    // obj.WriteToFile(filename);
 }
 
 int main(int argc, char **argv)
@@ -52,6 +112,7 @@ int main(int argc, char **argv)
     opcodes = new string[20];
     arguments = new string[20];
     objectCodes = new string[20];
+    set<int> s1;
     ifstream myfile("P2sampleWriter.lis");
 
     if (!myfile.is_open())
@@ -107,6 +168,7 @@ int main(int argc, char **argv)
                 if (idx > 50 && idx < 59)
                 {
                     objectCode.push_back(line[idx]);
+                    s1.insert(lineIdx);
                 }
 
                 idx++;
@@ -248,20 +310,16 @@ int main(int argc, char **argv)
             opcodes[lineIdx] = opcode;
             arguments[lineIdx] = argument;
             objectCodes[lineIdx] = objectCode;
-            symTab.insert(pair<string, string>(symbol, address)); //Book says error flags?
+
+            symTab.insert(pair<string, string>(symbol, address)); //Book says error flags
             lineIdx++;
         }
 
-        string bytesstring = to_string(bytes);
+        string bytesstring = ConvertToHexString(bytes);
+
         obj.SetLength(bytesstring);
-
+        AddTR(objectCodes, addresses, s1, symbols[0], &obj);
         obj.WriteToFile("test.obj");
-
-        //Print for debugging
-        for (int i = 0; i < 20; i++)
-        {
-            cout << addresses[i] << " " << symbols[i] << " " << opcodes[i] << " " << arguments[i] << " " << objectCodes[i] << endl;
-        }
 
         myfile.close();
     }
