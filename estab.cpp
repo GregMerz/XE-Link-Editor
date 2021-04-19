@@ -23,6 +23,7 @@ void Estab::InitEstab(string name, string address, string length){
 
 void Estab::PutIntoEstab(string name, string symbolName, string address, string length){
     symbolName = symbolName.append(6 - symbolName.size(), ' ');
+    name = name.append(4 - name.size(), ' ');
 
     //If not in map, place
     if(hmap.find(name) == hmap.end()){
