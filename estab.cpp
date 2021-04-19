@@ -14,7 +14,7 @@ vector<string> hvector;
 
 Info* info;
 
-Estab::Estab(string name, string address, string length){
+void Estab::InitEstab(string name, string address, string length){
     Info i(name,address,length);
     info = &i;
     hmap.insert(pair<string, Info>(name, i));

@@ -5,8 +5,9 @@
 #include <unordered_map>
 #include <set>
 #include <sstream>
-#include "estab.h"
+#include <vector>
 
+#include "estab.h"
 #include "objectprogram.h"
 
 using namespace std;
@@ -39,7 +40,7 @@ int ConvertToInt(string address)
     return x;
 }
 
-void AddTR(string *objectCodes, string *addresses, set<int> s1, string progname, ObjectProgram *obj)
+void AddTR(vector<string> objectCodes, vector<string> addresses, set<int> s1, string progname, ObjectProgram *obj)
 {
     string currenttextrecord = "-1";
     int currentlinecharactercount = 0;
@@ -56,12 +57,12 @@ void AddTR(string *objectCodes, string *addresses, set<int> s1, string progname,
         {
             if (currenttextrecord == "-1")
             {
-                currenttextrecord = addresses[*itr];
+                currenttextrecord = addresses.at(*itr);
                 obj->AddTextRecord(currenttextrecord);
             }
         }
 
-        if ((charactercount + objectCodes[*itr].size()) > 60)
+        if ((charactercount + objectCodes.at(*itr).size()) > 60)
         {
             isTooManyCharacters = true;
         }
@@ -82,8 +83,8 @@ void AddTR(string *objectCodes, string *addresses, set<int> s1, string progname,
             obj->AddTextRecord(currenttextrecord);
         }
 
-        obj->AddTextRecord(currenttextrecord, objectCodes[*itr]);
-        charactercount += objectCodes[*itr].size();
+        obj->AddTextRecord(currenttextrecord, objectCodes.at(*itr));
+        charactercount += objectCodes.at(*itr).size();
     }
 
     obj->SetTextRecordLength(currenttextrecord, ConvertToHexString(charactercount / 2));
@@ -140,239 +141,256 @@ void MemoryMapping(string* addresses, string* objectCodes){
 
 int main(int argc, char **argv)
 {
-    char line[80];
-    string *addresses;
-    string *symbols;
-    string *opcodes;
-    string *arguments;
-    string *objectCodes;
-    ObjectProgram obj;
-    int bytes = 0;
-    string headerName;
-    string headerAddress;
-    string textRecordAddress;
-    string textRecordLength;
-    unordered_map<string, char> extMap;
-    string extrefs;
-    addresses = new string[20];
-    symbols = new string[20];
-    opcodes = new string[20];
-    arguments = new string[20];
-    objectCodes = new string[20];
-    set<int> s1;
-    ifstream myfile("P2sampleWriter.lis");
-
-    if (!myfile.is_open())
+    vector<string> headerNames;
+    vector<string> headerAddresses;
+    vector<string> lengths;
+    Estab est;
+    for (int clIdx = 1; clIdx < argc; clIdx++)
     {
-        cout << "Unable to open file" << endl;
-    }
-    else
-    {
+        char line[80];
+        vector<string> addresses;
+        vector<string> symbols;
+        vector<string> opcodes;
+        vector<string> arguments;
+        vector<string> objectCodes;
+        vector<string> EXDEFS;
+        vector<string> EXDEFaddresses;
+        ObjectProgram obj;
+        int bytes = 0;
+        string headerName;
+        string headerAddress;
+        string textRecordAddress;
+        string textRecordLength;
+        unordered_map<string, char> extMap;
+        string extrefs;
+        set<int> s1;
+        string fileName = argv[clIdx];
 
-        int lineIdx = 0;
+        ifstream myfile(fileName);
 
-        // Get addresses and symbols and place them into symTab<string,string>
-        while (myfile.getline(line, 80))
+        if (!myfile.is_open())
+        {
+            cout << "Unable to open file" << endl;
+        }
+        else
         {
 
-            string address;
-            string symbol;
-            string opcode;
-            string argument;
-            string objectCode;
+            int lineIdx = 0;
 
-            // loop through each character in each line
-            int idx = 0;
-            while (isprint(line[idx]))
+            // Get addresses and symbols and place them into symTab<string,string>
+            while (myfile.getline(line, 80))
             {
-                if (isspace(line[idx]))
+
+                string address;
+                string symbol;
+                string opcode;
+                string argument;
+                string objectCode;
+
+                // loop through each character in each line
+                int idx = 0;
+                while (isprint(line[idx]))
                 {
+                    if (isspace(line[idx]))
+                    {
+                        idx++;
+                        continue;
+                    }
+
+                    // Add character to address if it is from col 0-7
+                    if (idx < 8)
+                    {
+                        address.push_back(line[idx]);
+                    }
+                    // Add character to symbol if it is from col 8-15
+                    if (idx > 7 && idx < 16)
+                    {
+                        symbol.push_back(line[idx]);
+                    }
+                    // Add character to opcode if it is from col 16-24
+                    if (idx > 15 && idx < 25)
+                    {
+                        opcode.push_back(line[idx]);
+                    }
+                    // Add character to argument if it is from col 25-50
+                    if (idx > 24 && idx < 51)
+                    {
+                        argument.push_back(line[idx]);
+                    }
+                    // Add character to objectCode if it is from col 51-58
+                    if (idx > 50 && idx < 59)
+                    {
+                        objectCode.push_back(line[idx]);
+                        s1.insert(lineIdx);
+                    }
+
                     idx++;
-                    continue;
                 }
 
-                // Add character to address if it is from col 0-7
-                if (idx < 8)
+                // If the opcode is START, we can set header name and header address information
+                if (opcode.compare("START") == 0)
                 {
-                    address.push_back(line[idx]);
-                }
-                // Add character to symbol if it is from col 8-15
-                if (idx > 7 && idx < 16)
-                {
-                    symbol.push_back(line[idx]);
-                }
-                // Add character to opcode if it is from col 16-24
-                if (idx > 15 && idx < 25)
-                {
-                    opcode.push_back(line[idx]);
-                }
-                // Add character to argument if it is from col 25-50
-                if (idx > 24 && idx < 51)
-                {
-                    argument.push_back(line[idx]);
-                }
-                // Add character to objectCode if it is from col 51-58
-                if (idx > 50 && idx < 59)
-                {
-                    objectCode.push_back(line[idx]);
-                    s1.insert(lineIdx);
+                    headerName = symbol;
+                    headerAddress = address;
+                    obj.InitHeader(headerName, headerAddress);
                 }
 
-                idx++;
-            }
-
-            // If the opcode is START, we can set header name and header address information
-            if (opcode.compare("START") == 0)
-            {
-                headerName = symbol;
-                headerAddress = address;
-                obj.InitHeader(headerName, headerAddress);
-            }
-
-            // If opcode is EXTDEF, we need to store all the extdef in a map
-            else if (opcode.compare("EXTDEF") == 0)
-            {
-                string extdef;
-
-                int beginExtdef = 0;
-                for (int i = 0; i < argument.size(); i++)
+                // If opcode is EXTDEF, we need to store all the extdef in a map
+                else if (opcode.compare("EXTDEF") == 0)
                 {
-                    if (argument.at(i) == ',')
+                    string extdef;
+
+                    int beginExtdef = 0;
+                    for (int i = 0; i < argument.size(); i++)
                     {
-                        extdef = argument.substr(beginExtdef, i - beginExtdef);
-                        pair<string, char> extdefMapEntry(extdef, 'D');
-                        extMap.insert(extdefMapEntry);
-                        beginExtdef = i + 1;
-                    }
-                }
-
-                extdef = argument.substr(beginExtdef, argument.size() - beginExtdef);
-                pair<string, char> extdefMapEntry(extdef, 'D');
-                extMap.insert(extdefMapEntry);
-            }
-            // If opcode is EXTREF, we need to store all the extref in a map
-            else if (opcode.compare("EXTREF") == 0)
-            {
-                string extref;
-
-                int beginExtref = 0;
-
-                for (int i = 0; i < argument.size(); i++)
-                {
-
-                    if (argument.at(i) == ',')
-                    {
-                        extref = argument.substr(beginExtref, i - beginExtref);
-                        pair<string, char> extrefMapEntry(extref, 'R');
-                        extMap.insert(extrefMapEntry);
-                        beginExtref = i + 1;
-                    }
-                }
-
-                extref = argument.substr(beginExtref, argument.size() - beginExtref);
-                pair<string, char> extrefMapEntry(extref, 'R');
-                extMap.insert(extrefMapEntry);
-            }
-
-            // Lines that declare variables
-            else if (symbol.size() != 0 && objectCode.size() == 0)
-            {
-                for (auto &[key, value] : extMap)
-                {
-                    if (value == 'R')
-                    {
-                        int index = argument.find(key);
-
-                        if (index + key.size() >= argument.size() || argument.at(index + key.size()) == ',')
+                        if (argument.at(i) == ',')
                         {
-                            if (index != string::npos)
-                            {
-                                if (index == 0 || argument[index - 1] == '+' || argument[index - 1] == '#')
-                                {
-                                    obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
-                                }
-                                else
-                                {
-                                    obj.AddModificationRecord(key, address, "-", objectCode.size() / 2);
-                                }
-                            }
+                            extdef = argument.substr(beginExtdef, i - beginExtdef);
+                            pair<string, char> extdefMapEntry(extdef, 'D');
+                            extMap.insert(extdefMapEntry);
+                            beginExtdef = i + 1;
                         }
                     }
 
-                    else
-                    {
-                        int index = argument.find(key);
+                    extdef = argument.substr(beginExtdef, argument.size() - beginExtdef);
+                    pair<string, char> extdefMapEntry(extdef, 'D');
+                    extMap.insert(extdefMapEntry);
+                }
+                // If opcode is EXTREF, we need to store all the extref in a map
+                else if (opcode.compare("EXTREF") == 0)
+                {
+                    string extref;
 
-                        if (index + key.size() >= argument.size() || argument.at(index + key.size()) == ',')
+                    int beginExtref = 0;
+
+                    for (int i = 0; i < argument.size(); i++)
+                    {
+
+                        if (argument.at(i) == ',')
                         {
-                            if (index != string::npos)
+                            extref = argument.substr(beginExtref, i - beginExtref);
+                            obj.AddEXTREF(extref);
+                            pair<string, char> extrefMapEntry(extref, 'R');
+                            extMap.insert(extrefMapEntry);
+                            beginExtref = i + 1;
+                        }
+                    }
+
+                    extref = argument.substr(beginExtref, argument.size() - beginExtref);
+                    obj.AddEXTREF(extref);
+                    pair<string, char> extrefMapEntry(extref, 'R');
+                    extMap.insert(extrefMapEntry);
+                }
+
+                // Lines that declare variables
+                else if (symbol.size() != 0 && objectCode.size() == 0)
+                {
+                    for (auto &[key, value] : extMap)
+                    {
+                        if (value == 'R')
+                        {
+                            int index = argument.find(key);
+
+                            if (index + key.size() >= argument.size() || argument.at(index + key.size()) == ',' || argument.at(index + key.size()) == '-' || argument.at(index + key.size()) == '+')
                             {
-                                if (index == 0 || argument[index - 1] == '+' || argument[index - 1] == '#')
+                                if (index != string::npos)
                                 {
-                                    obj.AddModificationRecord(headerName, address, "+", objectCode.size() / 2);
+                                    if (index == 0 || argument[index - 1] == '+' || argument[index - 1] == '#')
+                                    {
+                                        obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
+                                    }
+                                    else
+                                    {
+                                        obj.AddModificationRecord(key, address, "-", objectCode.size() / 2);
+                                    }
                                 }
-                                else
+                            }
+                        }
+
+                        else
+                        {
+                            int index = argument.find(key);
+
+                            if (index + key.size() >= argument.size() || argument.at(index + key.size()) == ',' || argument.at(index + key.size()) == '-' || argument.at(index + key.size()) == '+')
+                            {
+                                if (index != string::npos)
                                 {
-                                    obj.AddModificationRecord(headerName, address, "-", objectCode.size() / 2);
+                                    if (index == 0 || argument[index - 1] == '+' || argument[index - 1] == '#')
+                                    {
+                                        obj.AddModificationRecord(headerName, address, "+", objectCode.size() / 2);
+                                    }
+                                    else
+                                    {
+                                        obj.AddModificationRecord(headerName, address, "-", objectCode.size() / 2);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            // If opcode is not START, EXTDEF, or EXTREF, check for extref for modification records
-            else
-            {
-                
-
-                // Checking extref in text record space
-                for (auto &[key, value] : extMap)
+                // If opcode is not START, EXTDEF, or EXTREF, check for extref for modification records
+                else
                 {
-                    if (value == 'R')
+                    // Checking extref in text record space
+                    for (auto &[key, value] : extMap)
                     {
-                        int index = argument.find(key);
-
-                        if (index + key.size() >= argument.size() || argument.at(index + key.size()) == ',')
+                        if (value == 'R')
                         {
+                            int index = argument.find(key);
 
-                            if (index != string::npos)
+                            if (index + key.size() >= argument.size() || argument.at(index + key.size()) == ',')
                             {
-                                if (index == 0 || argument[index - 1] == '+')
+
+                                if (index != string::npos)
                                 {
-                                    obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
-                                }
-                                else
-                                {
-                                    obj.AddModificationRecord(key, address, "-", objectCode.size() / 2);
+                                    if (index == 0 || argument[index - 1] == '+' || argument[index - 1] == '#')
+                                    {
+                                        obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
+                                    }
+                                    else
+                                    {
+                                        obj.AddModificationRecord(key, address, "-", objectCode.size() / 2);
+                                    }
                                 }
                             }
                         }
                     }
                 }
+
+                if (extMap[symbol] == 'D')
+                {
+                    obj.AddEXTDEF(symbol, address);
+                    EXDEFS.push_back(symbol);
+                    EXDEFaddresses.push_back(address);
+                }
+
+                // Get how many bytes we are using from each opcode
+                bytes += objectCode.size() / 2;
+
+                addresses.push_back(address);
+                symbols.push_back(symbol);
+                opcodes.push_back(opcode);
+                arguments.push_back(argument);
+                objectCodes.push_back(objectCode);
+
+                symTab.insert(pair<string, string>(symbol, address)); //Book says error flags
+                lineIdx++;
             }
 
-            // Get how many bytes we are using from each opcode
-            bytes += objectCode.size() / 2;
+            string bytesstring = ConvertToHexString(bytes);
 
-            addresses[lineIdx] = address;
-            symbols[lineIdx] = symbol;
-            opcodes[lineIdx] = opcode;
-            arguments[lineIdx] = argument;
-            objectCodes[lineIdx] = objectCode;
-
-            symTab.insert(pair<string, string>(symbol, address)); //Book says error flags
-            lineIdx++;
+            obj.SetLength(bytesstring);
+            AddTR(objectCodes, addresses, s1, symbols.at(0), &obj);
+            string outputFile = headerName + ".obj";
+            obj.WriteToFile(outputFile);
+            est.PutIntoEstab(headerName, "",headerAddress, bytesstring);
+            for(int i = 0; i < EXDEFS.size(); i++){
+                est.PutIntoEstab(headerName, EXDEFS[i], EXDEFaddresses[i]);
+            }
+            myfile.close();
         }
-
-        string bytesstring = ConvertToHexString(bytes);
-
-        obj.SetLength(bytesstring);
-        MemoryMapping(addresses,objectCodes);
-        AddTR(objectCodes, addresses, s1, symbols[0], &obj);
-        obj.WriteToFile("test.obj");
-
-        myfile.close();
+        est.WriteEstab();
     }
 
     return 0;
