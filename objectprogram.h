@@ -17,8 +17,7 @@ public:
     string control_section_size;
     vector<string> lines;
 
-    ObjectProgram(string name = "name", string address = "0000", string size = "-1");
-
+    void InitHeader(string name, string address);
     void WriteToFile(string filename, string line = "-1", string action = "-1");
     void AddEXTDEF(string name, string loc);
     void AddEXTREF(string name);

@@ -6,6 +6,7 @@
 #include <set>
 #include <sstream>
 #include "estab.h"
+
 #include "objectprogram.h"
 
 using namespace std;
@@ -49,44 +50,60 @@ int ConvertToInt(string address){
 }
 
 void AddTR(string* objectCodes,string* addresses ,set<int> s1, string progname){
-    ObjectProgram obj(progname, addresses[0]);
+    ObjectProgram obj;
+    obj.control_section_name = progname;
+    obj.control_section_address = addresses[0];
 
     string currenttextrecord = "-1";
     int currentlinecharactercount = 0;
+    int charactercount = 0;
     bool isTooManyCharacters = false;
+    int length;
 
     set<int>::iterator itr;
     for (itr = s1.begin(); itr != s1.end(); itr++)
     {
         //start text record
-        if(currentlinecharactercount = 0){
-            obj.AddTextRecord(addresses[*itr]);
-            if(currenttextrecord == "-1")
+        if(charactercount == 0){
+            if(currenttextrecord == "-1"){
                 currenttextrecord = addresses[*itr];
+                obj.AddTextRecord(currenttextrecord);
+            }
+                
         }
 
-        if((currentlinecharactercount + objectCodes[*itr + 1].size()) > 60){
+        if((charactercount + objectCodes[*itr].size()) > 60){
+            //cout << charactercount + objectCodes[*itr + 1].size() << endl;
+            //cout << "We made it";
             isTooManyCharacters = true;
         }
 
-        if(currentlinecharactercount >= 60){
+        if(isTooManyCharacters || charactercount >= 55){
             //Add currentlinecharactercount/2 + address
-            int length = currentlinecharactercount/2;
-            obj.SetTextRecordLength(currenttextrecord, ConvertToHexString(length));
+            // cout << charactercount/2 << endl;
+            obj.SetTextRecordLength(currenttextrecord, ConvertToHexString(charactercount/2));
+            cout << charactercount/2 << endl;
+            cout << ConvertToHexString(charactercount/2) << endl;
             
             int addressValue = ConvertToInt(currenttextrecord);
             
-            int nextAddressInteger = addressValue + length;
+            int nextAddressInteger = addressValue + charactercount/2;
 
             //Set new current
             currenttextrecord = ConvertToHexString(nextAddressInteger);
-            currentlinecharactercount = 0;
+            charactercount = 0;
             isTooManyCharacters = false;
+            obj.AddTextRecord(currenttextrecord);
         }
-        obj.AddTextRecord(addresses[*itr], objectCodes[*itr]);
-        currentlinecharactercount = objectCodes[*itr].size();
+
+        obj.AddTextRecord(currenttextrecord, objectCodes[*itr]);
+        charactercount += objectCodes[*itr].size();
+        cout << charactercount << endl;
     }
+    
+    obj.SetTextRecordLength(currenttextrecord, ConvertToHexString(charactercount/2));
     string filename = progname + "objectlisting.txt";
+    obj.SetLength("FFF");
     obj.WriteToFile(filename);
 }
 
@@ -178,7 +195,7 @@ int main(int argc, char **argv)
             {
                 headerName = symbol;
                 headerAddress = address;
-                obj(headerName, headerAddress, new string());
+                obj.InitHeader(headerName, headerAddress);
             }
 
             // If opcode is EXTDEF, we need to store all the extdef in a map
@@ -215,14 +232,14 @@ int main(int argc, char **argv)
                     if (argument.at(i) == ',')
                     {
                         extref = argument.substr(beginExtref, i - beginExtref);
-                        pair<string, char> extrefMapEntry(extref, 'D');
+                        pair<string, char> extrefMapEntry(extref, 'R');
                         extMap.insert(extrefMapEntry);
                         beginExtref = i + 1;
                     }
                 }
 
                 extref = argument.substr(beginExtref, argument.size() - beginExtref);
-                pair<string, char> extrefMapEntry(extref, 'D');
+                pair<string, char> extrefMapEntry(extref, 'R');
                 extMap.insert(extrefMapEntry);
             }
 
@@ -235,15 +252,18 @@ int main(int argc, char **argv)
                     {
                         int index = argument.find(key);
 
-                        if (index != string::npos)
+                        if (index + key.size() >= argument.size() || argument.at(index + key.size()) == ',')
                         {
-                            if (index == 0 || argument[index - 1] == '+')
+                            if (index != string::npos)
                             {
-                                obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
-                            }
-                            else
-                            {
-                                obj.AddModificationRecord(key, address, "-", objectCode.size() / 2);
+                                if (index == 0 || argument[index - 1] == '+')
+                                {
+                                    obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
+                                }
+                                else
+                                {
+                                    obj.AddModificationRecord(key, address, "-", objectCode.size() / 2);
+                                }
                             }
                         }
                     }
@@ -252,15 +272,18 @@ int main(int argc, char **argv)
                     {
                         int index = argument.find(key);
 
-                        if (index != string::npos)
+                        if (index + key.size() >= argument.size() || argument.at(index + key.size()) == ',')
                         {
-                            if (index == 0 || argument[index - 1] == '+')
+                            if (index != string::npos)
                             {
-                                obj.AddModificationRecord(headerName, address, "+", objectCode.size() / 2);
-                            }
-                            else
-                            {
-                                obj.AddModificationRecord(headerName, address, "-", objectCode.size() / 2);
+                                if (index == 0 || argument[index - 1] == '+')
+                                {
+                                    obj.AddModificationRecord(headerName, address, "+", objectCode.size() / 2);
+                                }
+                                else
+                                {
+                                    obj.AddModificationRecord(headerName, address, "-", objectCode.size() / 2);
+                                }
                             }
                         }
                     }
@@ -276,15 +299,19 @@ int main(int argc, char **argv)
                     {
                         int index = argument.find(key);
 
-                        if (index != string::npos)
+                        if (index + key.size() >= argument.size() || argument.at(index + key.size()) == ',')
                         {
-                            if (index == 0 || argument[index - 1] == '+')
+
+                            if (index != string::npos)
                             {
-                                obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
-                            }
-                            else
-                            {
-                                obj.AddModificationRecord(key, address, "-", objectCode.size() / 2);
+                                if (index == 0 || argument[index - 1] == '+')
+                                {
+                                    obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
+                                }
+                                else
+                                {
+                                    obj.AddModificationRecord(key, address, "-", objectCode.size() / 2);
+                                }
                             }
                         }
                     }
@@ -305,21 +332,21 @@ int main(int argc, char **argv)
         }
 
         string bytesstring = to_string(bytes);
-        //obj(headerName, headerAddress, to_string(bytes));
+        obj.SetLength(bytesstring);
 
         obj.WriteToFile("test.obj");
 
-        //Print for debugging
-        for (int i = 0; i < 20; i++)
-        {
-            cout << objectCodes[i] << endl;
-        }
+        // //Print for debugging
+        // for (int i = 0; i < 20; i++)
+        // {
+        //     cout << objectCodes[i] << endl;
+        // }
 
-        set<int, greater<int> >::iterator itr;
-        for (itr = s1.begin(); itr != s1.end(); itr++)
-        {
-            cout << *itr<<" ";
-        }
+        // set<int, greater<int> >::iterator itr;
+        // for (itr = s1.begin(); itr != s1.end(); itr++)
+        // {
+        //     cout << *itr<<" ";
+        // }
 
         AddTR(objectCodes,addresses , s1, symbols[0]);
 

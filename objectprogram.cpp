@@ -8,18 +8,13 @@
 
 using namespace std;
 
-ObjectProgram::ObjectProgram(string name, string address, string length)
-{
+void ObjectProgram::InitHeader(string name, string address) {
     //Append spaces to the END name to make name equal to 7 characters
     control_section_name = name.append(6 - name.size(), ' ');
 
     //Insert 0s in the beginning of string to make equal to length of six
     address.insert(address.begin(), 6 - address.length(), '0');
     control_section_address = address;
-
-    //Insert 0s in the beginning of string to make equal to length of six
-    length.insert(length.begin(), 6 - length.length(), '0');
-    control_section_size = length;
 }
 
 // Add EXTDEF to Object Program, vector of objects with name and location

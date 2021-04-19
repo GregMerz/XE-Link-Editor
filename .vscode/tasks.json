@@ -15,7 +15,7 @@
             "command": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe",
             "args": [
                 "-g",
-                "${fileDirname}\\**.cpp",
+                "${workspaceFolder}/*.cpp",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
 >>>>>>> d74a05a498f1decf068cbb88382f9bfc19cefc27
