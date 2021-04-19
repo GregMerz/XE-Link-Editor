@@ -3,7 +3,7 @@
 #include <string.h>
 #include <map>
 #include <unordered_map>
-#include <vector>
+
 #include "objectprogram.h"
 
 using namespace std;
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
             {
                 headerName = symbol;
                 headerAddress = address;
-                obj(headerName, headerAddress, new string());
+                obj.InitHeader(headerName, headerAddress);
             }
 
             // If opcode is EXTDEF, we need to store all the extdef in a map
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
                     if (argument.at(i) == ',')
                     {
                         extref = argument.substr(beginExtref, i - beginExtref);
-                        pair<string, char> extrefMapEntry(extref, 'D');
+                        pair<string, char> extrefMapEntry(extref, 'R');
                         extMap.insert(extrefMapEntry);
                         beginExtref = i + 1;
                     }
@@ -243,7 +243,7 @@ int main(int argc, char **argv)
         }
 
         string bytesstring = to_string(bytes);
-        //obj(headerName, headerAddress, to_string(bytes));
+        obj.SetLength(bytesstring);
 
         obj.WriteToFile("test.obj");
 
