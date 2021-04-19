@@ -30,7 +30,7 @@ void recordInfo(int startIdx, int endIdx, char *info, char *data)
 
 int main(int argc, char **argv)
 {
-    string line;
+    char line[80];
     string *addresses;
     string *symbols;
     string *opcodes;
