@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     opcodes = new string[20];
     arguments = new string[20];
     objectCodes = new string[20];
-    ifstream myfile("P2sampleAdder.lis");
+    ifstream myfile("P2sampleWriter.lis");
 
     if (!myfile.is_open())
     {
@@ -161,7 +161,7 @@ int main(int argc, char **argv)
                 }
 
                 extref = argument.substr(beginExtref, argument.size() - beginExtref);
-                pair<string, char> extrefMapEntry(extref, 'D');
+                pair<string, char> extrefMapEntry(extref, 'R');
                 extMap.insert(extrefMapEntry);
             }
 
@@ -174,15 +174,18 @@ int main(int argc, char **argv)
                     {
                         int index = argument.find(key);
 
-                        if (index != string::npos)
+                        if (index + key.size() >= argument.size() || argument.at(index + key.size()) == ',')
                         {
-                            if (index == 0 || argument[index - 1] == '+')
+                            if (index != string::npos)
                             {
-                                obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
-                            }
-                            else
-                            {
-                                obj.AddModificationRecord(key, address, "-", objectCode.size() / 2);
+                                if (index == 0 || argument[index - 1] == '+')
+                                {
+                                    obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
+                                }
+                                else
+                                {
+                                    obj.AddModificationRecord(key, address, "-", objectCode.size() / 2);
+                                }
                             }
                         }
                     }
@@ -191,15 +194,18 @@ int main(int argc, char **argv)
                     {
                         int index = argument.find(key);
 
-                        if (index != string::npos)
+                        if (index + key.size() >= argument.size() || argument.at(index + key.size()) == ',')
                         {
-                            if (index == 0 || argument[index - 1] == '+')
+                            if (index != string::npos)
                             {
-                                obj.AddModificationRecord(headerName, address, "+", objectCode.size() / 2);
-                            }
-                            else
-                            {
-                                obj.AddModificationRecord(headerName, address, "-", objectCode.size() / 2);
+                                if (index == 0 || argument[index - 1] == '+')
+                                {
+                                    obj.AddModificationRecord(headerName, address, "+", objectCode.size() / 2);
+                                }
+                                else
+                                {
+                                    obj.AddModificationRecord(headerName, address, "-", objectCode.size() / 2);
+                                }
                             }
                         }
                     }
@@ -215,15 +221,19 @@ int main(int argc, char **argv)
                     {
                         int index = argument.find(key);
 
-                        if (index != string::npos)
+                        if (index + key.size() >= argument.size() || argument.at(index + key.size()) == ',')
                         {
-                            if (index == 0 || argument[index - 1] == '+')
+
+                            if (index != string::npos)
                             {
-                                obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
-                            }
-                            else
-                            {
-                                obj.AddModificationRecord(key, address, "-", objectCode.size() / 2);
+                                if (index == 0 || argument[index - 1] == '+')
+                                {
+                                    obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
+                                }
+                                else
+                                {
+                                    obj.AddModificationRecord(key, address, "-", objectCode.size() / 2);
+                                }
                             }
                         }
                     }

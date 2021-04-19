@@ -12,7 +12,7 @@
 0019             JLT      LOOP                     3B2FF3
 001C            +STA      TOTAL                    0F100003
 0020             LDT      TOTAL                    772000
-0023    TOTAL    RESW     1
+0023    TOTAL    RESW     COUNT-LEN
 0026    LEN      WORD     X'02C
                  END
 0029    *       =C'EOF'                            454F46
