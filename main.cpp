@@ -19,42 +19,28 @@ string getInfo(int startIdx, string data)
     return info;
 }
 
-void recordInfo(int startIdx, int endIdx, char *info, char *data)
+string ConvertToHexString(int address)
 {
-    info[0] = data[startIdx];
-    for (int i = startIdx + 1; i < endIdx; i++)
-    {
-        if (!isspace(data[i]))
-            info[i - startIdx] = data[i];
-        else
-            break;
-    }
-    info[endIdx] = 0;
-}
-
-string ConvertToHexString(int address){
     stringstream stream;
     stream << hex << address;
-    string result( stream.str() );
-    for (auto & c: result) c = toupper(c);
+    string result(stream.str());
+    for (auto &c : result)
+        c = toupper(c);
     return result;
 }
 
-int ConvertToInt(string address){
-    int x;   
+int ConvertToInt(string address)
+{
+    int x;
     stringstream ss;
     ss << hex << address;
     ss >> x;
-    
+
     return x;
 }
 
-//Add to text record
-void AddTR(string* objectCodes,string* addresses ,set<int> s1, string progname){
-    ObjectProgram obj;
-    obj.control_section_name = progname;
-    obj.control_section_address = addresses[0];
-
+void AddTR(string *objectCodes, string *addresses, set<int> s1, string progname, ObjectProgram *obj)
+{
     string currenttextrecord = "-1";
     int currentlinecharactercount = 0;
     int charactercount = 0;
@@ -66,41 +52,90 @@ void AddTR(string* objectCodes,string* addresses ,set<int> s1, string progname){
     for (itr = s1.begin(); itr != s1.end(); itr++)
     {
         //start text record
-        if(charactercount == 0){
-            if(currenttextrecord == "-1"){
+        if (charactercount == 0)
+        {
+            if (currenttextrecord == "-1")
+            {
                 currenttextrecord = addresses[*itr];
-                obj.AddTextRecord(currenttextrecord);
+                obj->AddTextRecord(currenttextrecord);
             }
-                
         }
 
-        //If it is going to overflow
-        if((charactercount + objectCodes[*itr].size()) > 60){
+        if ((charactercount + objectCodes[*itr].size()) > 60)
+        {
             isTooManyCharacters = true;
         }
 
-        if(isTooManyCharacters || charactercount >= 55){
-            //Set length of text record
-            obj.SetTextRecordLength(currenttextrecord, ConvertToHexString(charactercount/2));
+        if (isTooManyCharacters || charactercount >= 55)
+        {
+            //Add currentlinecharactercount/2 + address
+            obj->SetTextRecordLength(currenttextrecord, ConvertToHexString(charactercount / 2));
 
-            int addressValue = ConvertToInt(currenttextrecord); 
-            int nextAddressInteger = addressValue + charactercount/2;
+            int addressValue = ConvertToInt(currenttextrecord);
+
+            int nextAddressInteger = addressValue + charactercount / 2;
 
             //Set and start new current text record
             currenttextrecord = ConvertToHexString(nextAddressInteger);
             charactercount = 0;
             isTooManyCharacters = false;
-            obj.AddTextRecord(currenttextrecord);
+            obj->AddTextRecord(currenttextrecord);
         }
 
-        obj.AddTextRecord(currenttextrecord, objectCodes[*itr]);
+        obj->AddTextRecord(currenttextrecord, objectCodes[*itr]);
         charactercount += objectCodes[*itr].size();
     }
-    
-    obj.SetTextRecordLength(currenttextrecord, ConvertToHexString(charactercount/2));
-    string filename = progname + "objectlisting.obj";
-    obj.SetLength("FFFFF");
-    obj.WriteToFile(filename);
+
+    obj->SetTextRecordLength(currenttextrecord, ConvertToHexString(charactercount / 2));
+}
+
+void MemoryMapping(string* addresses, string* objectCodes){
+    string starting_address = addresses[0];
+    string ending_address = addresses[addresses->size() - 1];
+
+    int starting_address_int = ConvertToInt(starting_address);
+    int ending_address_int = ConvertToInt(ending_address);
+
+    string tmp;   
+    for(int i = 0; i < 20; i++){
+        if(objectCodes[i].size() == 6){                //If it's format 3 get the last 2 characters
+            tmp = objectCodes[i].substr(4,6);
+            int num = ConvertToInt(tmp);
+            if(num < starting_address_int && num > ending_address_int){      //See if the characters are out of bounds
+                if(num < 0){                                                 //If it's a negative number it may be jumping back
+                    num = ConvertToInt(addresses[i]) - num;                  //If it is, see if after jump back it's still in range
+                    if(num > starting_address_int){
+                        continue;
+                    }
+                }if(num > 0){
+                    num = ConvertToInt(addresses[i]) + num;
+                    if(num < ending_address_int){
+                        continue;
+                    }
+                }
+                cout << "Out of program memory space\n";
+                exit(EXIT_FAILURE);
+            }
+        }else if(objectCodes[i].size() == 8){          //If it's format 4 get the last 4 characters
+            tmp = objectCodes[i].substr(6,8);
+            int num = ConvertToInt(tmp);
+            if(num < starting_address_int && num > ending_address_int){   //See if the characters are out of bounds
+                if(num < 0){
+                    num = ConvertToInt(addresses[i]) - num;
+                    if(num > starting_address_int){
+                        continue;
+                    }
+                }if(num > 0){
+                    num = ConvertToInt(addresses[i]) + num;
+                    if(num < ending_address_int){
+                        continue;
+                    }
+                }
+                cout << "Out of program memory space\n";
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
 }
 
 int main(int argc, char **argv)
@@ -125,7 +160,7 @@ int main(int argc, char **argv)
     arguments = new string[20];
     objectCodes = new string[20];
     set<int> s1;
-    ifstream myfile("P2sampleAdder.lis");
+    ifstream myfile("P2sampleWriter.lis");
 
     if (!myfile.is_open())
     {
@@ -252,7 +287,7 @@ int main(int argc, char **argv)
                         {
                             if (index != string::npos)
                             {
-                                if (index == 0 || argument[index - 1] == '+')
+                                if (index == 0 || argument[index - 1] == '+' || argument[index - 1] == '#')
                                 {
                                     obj.AddModificationRecord(key, address, "+", objectCode.size() / 2);
                                 }
@@ -272,7 +307,7 @@ int main(int argc, char **argv)
                         {
                             if (index != string::npos)
                             {
-                                if (index == 0 || argument[index - 1] == '+')
+                                if (index == 0 || argument[index - 1] == '+' || argument[index - 1] == '#')
                                 {
                                     obj.AddModificationRecord(headerName, address, "+", objectCode.size() / 2);
                                 }
@@ -289,6 +324,9 @@ int main(int argc, char **argv)
             // If opcode is not START, EXTDEF, or EXTREF, check for extref for modification records
             else
             {
+                
+
+                // Checking extref in text record space
                 for (auto &[key, value] : extMap)
                 {
                     if (value == 'R')
@@ -327,12 +365,13 @@ int main(int argc, char **argv)
             lineIdx++;
         }
 
-        string bytesstring = to_string(bytes);
-        obj.SetLength(bytesstring);
+        string bytesstring = ConvertToHexString(bytes);
 
+        obj.SetLength(bytesstring);
+        MemoryMapping(addresses,objectCodes);
+        AddTR(objectCodes, addresses, s1, symbols[0], &obj);
         obj.WriteToFile("test.obj");
 
-        AddTR(objectCodes,addresses , s1, symbols[0]);
         myfile.close();
     }
 

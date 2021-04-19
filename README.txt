@@ -14,7 +14,6 @@ What it does:
 How to use it:
     1. Compile project by using the makefile. 
         a.Run the command "make". 
-        b. Then run the command "make run", to run the project.
     2. Then type in the following command to run “led <file1> <file2> ... <filen>”
     3. Corresponding files will be placed in folder
 
