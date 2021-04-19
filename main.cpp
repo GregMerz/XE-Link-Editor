@@ -53,33 +53,22 @@ int main(int argc, char **argv)
     {
 
         int lineIdx = 0;
-        char *address;
-        char *symbol;
-        char *opcode;
-        char *argument;
-        char *objectCode;
+        
 
         // Get addresses and symbols and place them into symTab<string,string>
         while (myfile.getline(line, 80))
         {
 
-            address = new char[4];
-            symbol = new char[10];
-            opcode = new char[10];
-            argument = new char[24];
-            objectCode = new char[9];
+            string address;
+            string symbol;
+            string opcode;
+            string argument;
+            string objectCode;
 
-            int addressCounter = 0;
-            int symbolCounter = 0;
-            int opcodeCounter = 1;
-            int argumentCounter = 1;
-            int objectCounter = 0;
-
-            opcode[0] = ' ';
-            argument[0] = ' ';
+            opcode.push_back(' ');
+            argument.push_back(' ');
 
             int idx = 0;
-
             while (isprint(line[idx]))
             {
                 if (isspace(line[idx]))
@@ -89,54 +78,48 @@ int main(int argc, char **argv)
                 }
                 if (idx < 8)
                 {
-                    address[idx] = line[idx];
-                    addressCounter++;
+                    address.push_back(line[idx]);
+                    
                 }
 
                 if (idx > 7 && idx < 16)
                 {
-                    symbol[idx - 8] = line[idx];
-                    symbolCounter++;
+                    symbol.push_back(line[idx]);
+                    
                 }
 
                 if (idx > 15 && idx < 25)
                 {
-                    opcode[idx - 16] = line[idx];
-                    opcodeCounter++;
+                    opcode.push_back(line[idx]);
+                    
                 }
 
                 if (idx > 24 && idx < 51)
                 {
-                    argument[idx - 25] = line[idx];
-                    argumentCounter++;
+                    argument.push_back(line[idx]);
+                    
                 }
 
                 if (idx > 50 && idx < 57)
                 {
-                    objectCode[idx - 49] = line[idx];
-                    objectCounter++;
+                    objectCode.push_back(line[idx]);
+                    
                 }
 
                 idx++;
             }
 
-            address[addressCounter] = 0;
-            symbol[symbolCounter] = 0;
-            opcode[opcodeCounter] = 0;
-            argument[argumentCounter] = 0;
-            objectCode[objectCounter] = 0;
-
-            if (strcmp(opcode, " EXTDEF") == 0)
+            if (opcode.compare(" EXTDEF") == 0)
             {
                 char *extdef = new char[10];
 
                 int beginExtdef = 0;
 
-                for (int i = 0; i < argumentCounter + 1; i++)
+                for (int i = 0; i < argument.size() + 1; i++)
                 {
-                    if (i < argumentCounter)
+                    if (i < argument.size())
                     {
-                        if (argument[i] != ',')
+                        if (argument.at(i) != ',')
                         {
                             extdef[i - beginExtdef] = argument[i];
                         }
@@ -157,17 +140,17 @@ int main(int argc, char **argv)
                 }
             }
 
-            if (strcmp(opcode, " EXTREF") == 0)
+            else if (opcode.compare(" EXTREF") == 0)
             {
                 char *extref = new char[10];
 
                 int beginExtref = 0;
 
-                for (int i = 0; i < argumentCounter + 1; i++)
+                for (int i = 0; i < argument.size() + 1; i++)
                 {
-                    if (i < argumentCounter)
+                    if (i < argument.size())
                     {
-                        if (argument[i] != ',')
+                        if (argument.at(i) != ',')
                         {
                             extref[i - beginExtref] = argument[i];
                         }
@@ -186,24 +169,10 @@ int main(int argc, char **argv)
                         extMap.insert(extrefMapEntry);
                     }
                 }
+
+                
             }
 
-            /*
-            address = new char[4];
-            symbol = new char[10];
-            opcode = new char[10];
-            argument = new char[24];
-            objectCode = new char[9];
-            recordInfo(0, 4, address, line);
-            //getSymbol(8, line);
-            recordInfo(8, 16, symbol, line);
-            //recordInfo(16, 25, opcode,line);      //<---------------------------- Can't get this working for some reason
-            opcode = &getInfo(16, line)[0];
-            recordInfo(25, 51, argument, line);
-            //argument = &getInfo(20, line)[0];
-            recordInfo(49, 57, objectCode, line);
-            //objectCode = &getInfo(27, line)[0];
-            */
             addresses[lineIdx] = address;
             symbols[lineIdx] = symbol;
             opcodes[lineIdx] = opcode;
