@@ -1,0 +1,6 @@
+OBJECTS = pagetable.o pagetable_functions.o output_mode_helpers.o byu_tracereader.o
+pagetable: $(OBJECTS)
+	g++ $(OBJECTS) -o pagetable
+output_mode_helplers.o pagetable.o: output_mode_helpers.h
+byu_tracereader.o pagetable.o: byutr.h
+pagetable_functions.o pagetable.o: pagetable_functions.h

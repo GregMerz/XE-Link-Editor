@@ -1,0 +1,56 @@
+0000    LOADER   START    0
+0000             EXTDEF   ADDR,ADDR2,ADDR3
+0000             EXTREF   READ,WRITE
+0000    FIRST    CLEAR    X                        B41000
+0002             JSUB     GETPAIR                  4B202F
+0005             STCH     ADDR                     572071
+0008             JSUB     GETPAIR                  4B2029
+000B             STCH     ADDR2                    57206C
+000E             JSUB     GETPAIR                  4B2023
+0011             STCH     ADDR3                    572067
+0014             LDB      ADDR                     6B2062
+0017             JSUB     GETPAIR                  4B201A
+001A             STCH     ADDR                     57205C
+001D             JSUB     GETPAIR                  4B2014
+0020             STCH     ADDR2                    572057
+0023             JSUB     GETPAIR                  4B200E
+0026             STCH     ADDR3                    572052
+0029    LOOP     JSUB     GETPAIR                  4B2008
+                 BASE     ADDR
+002C             STCH     ADDR,X                   57C000
+                 NOBASE
+002F             TIXR     X                        B81000
+0031             J        LOOP                     3F2FF5
+0034    GETPAIR  STL      RTADDR                   172045 
+0037             JSUB     READ                     4B200E
+003A             SHIFTL   A,4                      A40300    
+003C             STCH     HEX                      572040 
+003F             JSUB     READ                     4B2010  
+0042             OR       ORADDR                   472038  
+0045             J       @RTADDR                   3E2034   
+0048    READ     TD      #X'F1'                    E100F1   
+004B             JEQ      READ                     332FFA  
+004E             CLEAR    A                        B40000
+0050             RD      #X'F1'                    D900F1  
+0053             COMP    #48                       290030 
+0056             JLT      EOFCK                    3B200F    
+0059             SUB     #48                       1D0030    
+005C             COMP    #10                       29000A     
+005F             JLT      GOBACK                   3B2003 
+0062             SUB     #7                        1D0007
+0065    GOBACK   RSUB                              4F0000
+0068    EOFCK    COMP    #33                       290021       
+006B             JEQ      EXIT                     332010
+006E             COMP    #4                        290004     
+0071             JGT      READ                     372FD4
+0074    EXIT     CLEAR    L                        B42000    
+0076             J       @ADDR                     3E2000
+0079    ADDR     BYTE     ADDR3                              
+007A    ADDR2    BYTE     READ-ADDR         
+007B    ADDR3    BYTE     WRITE
+007C    RTADDR   RESB     1       
+007D    ORADDR   BYTE     ADDR3-WRITE       
+007E             RESB     1    
+007F    HEX      RESB     1      
+                 END
+0082    *       =C'EOF'                            454F46
