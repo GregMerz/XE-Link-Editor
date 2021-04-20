@@ -23,7 +23,7 @@ void Estab::InitEstab(string name, string address, string length){
 
 void Estab::PutIntoEstab(string name, string symbolName, string address, string length){
     symbolName = symbolName.append(6 - symbolName.size(), ' ');
-    name = name.append(4 - name.size(), ' ');
+    name = name.append(6 - name.size(), ' ');
 
     //If not in map, place
     if(hmap.find(name) == hmap.end()){
@@ -59,7 +59,7 @@ void Estab::WriteEstab(){
         myfile.open("name.st", ios::app);
         Info infocurr = x.second;
         myfile << x.first;
-        myfile << setw(42) << setfill(' ') << infocurr.address;
+        myfile << setw(41) << setfill(' ') << infocurr.address;
         myfile << setw(18) << setfill(' ') << infocurr.length << endl;
         myfile.close();
         infocurr.WriteSymbolMap();

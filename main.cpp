@@ -9,7 +9,6 @@
 
 #include "estab.h"
 #include "objectprogram.h"
-#include "info.h"
 
 using namespace std;
 
@@ -99,7 +98,7 @@ void MemoryMapping(string* addresses, string* objectCodes){
     int ending_address_int = ConvertToInt(ending_address);
 
     string tmp;   
-    for(int i = 0; i < 20; i++){
+    for(int i = 0; i < addresses->size(); i++){
         if(objectCodes[i].size() == 6){                //If it's format 3 get the last 2 characters
             tmp = objectCodes[i].substr(4,6);
             int num = ConvertToInt(tmp);
