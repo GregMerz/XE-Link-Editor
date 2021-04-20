@@ -9,7 +9,8 @@
 
 using namespace std;
 
-void ObjectProgram::InitHeader(string name, string address) {
+void ObjectProgram::InitHeader(string name, string address)
+{
     //Append spaces to the END name to make name equal to 7 characters
     control_section_name = name.append(6 - name.size(), ' ');
 
@@ -85,22 +86,22 @@ void ObjectProgram::WriteToFile(string filename, string line, string action)
     myfile << "H^" << control_section_name << carrot << control_section_address << carrot << control_section_size << endl;
     myfile << "D";
 
-    for (EXTDEF curr : vectorEXTDEF)
+    for (int i = 0; i < vectorEXTDEF.size(); i++)
     {
-        myfile << carrot << curr.name << carrot << curr.location;
+        myfile << carrot << vectorEXTDEF.at(i).name << carrot << vectorEXTDEF.at(i).location;
     }
 
     myfile << "\nR";
-    for (string curr : vectorEXTREF)
+    for (int i = 0; i < vectorEXTREF.size(); i++)
     {
-        myfile << carrot << curr;
+        myfile << carrot << vectorEXTREF.at(i);
     }
 
     //Text Record order is in Vector
     //Text Recrod Information is in Map
-    for (string curr : TextRecordsVector)
+    for (int i = 0; i < TextRecordsVector.size(); i++)
     {
-        TextRecord *trInfo = &(TextRecordMap.at(curr));
+        TextRecord *trInfo = &(TextRecordMap.at(TextRecordsVector.at(i)));
         myfile << "\nT";
         myfile << carrot << trInfo->startingAddress;
         myfile << carrot << trInfo->size;
@@ -122,10 +123,11 @@ void ObjectProgram::WriteToFile(string filename, string line, string action)
     }
 
     //Print Modification Records
-    for (const ModificationRecord &curr : ModificationRecordList)
+    list<ModificationRecord>::iterator it = ModificationRecordList.begin();
+    while (it != ModificationRecordList.end())
     {
         string str;
-        if (curr.format == 3)
+        if ((*it).format == 3)
         {
             str = "06";
         }
@@ -133,7 +135,9 @@ void ObjectProgram::WriteToFile(string filename, string line, string action)
         {
             str = "05";
         }
-        myfile << "\nM^" << curr.address << carrot << str << carrot << curr.sign << curr.symbol;
+        myfile << "\nM^" << (*it).address << carrot << str << carrot << (*it).sign << (*it).symbol;
+
+        it++;
     }
     myfile.close();
 }

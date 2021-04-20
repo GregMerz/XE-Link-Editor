@@ -5,74 +5,87 @@
 #include <utility>
 #include <iomanip>
 #include <vector>
+#include <iterator>
 
 #include "estab.h"
 
 using namespace std;
-map<string,Info> Estab::hmap;
+map<string, Info> Estab::hmap;
 vector<string> hvector;
 
-Info* info;
+Info *info;
 
-void Estab::InitEstab(string name, string address, string length){
-    Info i(name,address,length);
+void Estab::InitEstab(string name, string address, string length)
+{
+    Info i(name, address, length);
     info = &i;
     hmap.insert(pair<string, Info>(name, i));
     hvector.push_back(name);
 }
 
-void Estab::PutIntoEstab(string name, string symbolName, string address, string length){
+void Estab::PutIntoEstab(string name, string symbolName, string address, string length)
+{
     symbolName = symbolName.append(6 - symbolName.size(), ' ');
     name = name.append(6 - name.size(), ' ');
 
     //If not in map, place
-    if(hmap.find(name) == hmap.end()){
+    if (hmap.find(name) == hmap.end())
+    {
         Info in(name, address, length);
-        hmap.insert(pair<string,Info>(name,in));
+        hmap.insert(pair<string, Info>(name, in));
         hvector.push_back(name);
         info = &in;
     }
-    
-    
+
     //At this point the control section name is inserted
     //Extra space in check since I am appending
-    if(symbolName != "      "){
+    if (symbolName != "      ")
+    {
         PutIntoSymbolMap(name, symbolName, address);
     }
 }
 
-void Estab::PutIntoSymbolMap(string name, string symbolName, string address){
+void Estab::PutIntoSymbolMap(string name, string symbolName, string address)
+{
     //Point to symbolMap (put it into vairable)
-    Info* ff = &(hmap.at(name));
+    Info *ff = &(hmap.at(name));
     ff->PutIntoSymbolMap(symbolName, address);
 }
 
-void Estab::WriteEstab(){
+void Estab::WriteEstab()
+{
     ofstream myfile;
     myfile.open("name.st");
 
     myfile << "Control Section     | Symbol Name        | Address            |Length" << endl;
 
     myfile.close();
-    for (auto const& x : hmap)
+
+    map<string, Info>::iterator it = hmap.begin();
+
+    while (it != hmap.end())
     {
         myfile.open("name.st", ios::app);
-        Info infocurr = x.second;
-        myfile << x.first;
+        Info infocurr = it->second;
+        myfile << it->first;
         myfile << setw(41) << setfill(' ') << infocurr.address;
         myfile << setw(18) << setfill(' ') << infocurr.length << endl;
         myfile.close();
         infocurr.WriteSymbolMap();
+
+        it++;
     }
 }
 
-void Estab::PrintEstab(){
+void Estab::PrintEstab()
+{
     cout << "Control Section     | Symbol Name        | Address            |Length" << endl;
 
-    for(string curr: hvector){
+    for (string curr : hvector)
+    {
         Info infocurr = hmap.at(curr);
         cout << curr;
-        cout << setw(42) << setfill(' ') << infocurr.address;
+        cout << setw(41) << setfill(' ') << infocurr.address;
         cout << setw(18) << setfill(' ') << infocurr.length << endl;
 
         infocurr.PrintSymbolMap();

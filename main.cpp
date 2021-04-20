@@ -2,10 +2,11 @@
 #include <fstream>
 #include <string.h>
 #include <map>
-#include <unordered_map>
 #include <set>
 #include <sstream>
 #include <vector>
+#include <iterator>
+#include <stdlib.h>
 
 #include "estab.h"
 #include "objectprogram.h"
@@ -25,9 +26,11 @@ string ConvertToHexString(int address)
     stringstream stream;
     stream << hex << address;
     string result(stream.str());
-    for (auto &c : result)
-        c = toupper(c);
-    return result;
+
+    string hexidecimal;
+    for (int i = 0; i < result.length(); i++)
+        hexidecimal.push_back(toupper(result.at(i)));
+    return hexidecimal;
 }
 
 int ConvertToInt(string address)
@@ -90,45 +93,62 @@ void AddTR(vector<string> objectCodes, vector<string> addresses, set<int> s1, st
     obj->SetTextRecordLength(currenttextrecord, ConvertToHexString(charactercount / 2));
 }
 
-void MemoryMapping(string* addresses, string* objectCodes){
+void MemoryMapping(string *addresses, string *objectCodes)
+{
     string starting_address = addresses[0];
     string ending_address = addresses[addresses->size() - 1];
 
     int starting_address_int = ConvertToInt(starting_address);
     int ending_address_int = ConvertToInt(ending_address);
 
-    string tmp;   
-    for(int i = 0; i < addresses->size(); i++){
-        if(objectCodes[i].size() == 6){                //If it's format 3 get the last 2 characters
-            tmp = objectCodes[i].substr(4,6);
+    string tmp;
+    for (int i = 0; i < addresses->size(); i++)
+    {
+        if (objectCodes[i].size() == 6)
+        { //If it's format 3 get the last 2 characters
+            tmp = objectCodes[i].substr(4, 6);
             int num = ConvertToInt(tmp);
-            if(num < starting_address_int && num > ending_address_int){      //See if the characters are out of bounds
-                if(num < 0){                                                 //If it's a negative number it may be jumping back
-                    num = ConvertToInt(addresses[i]) - num;                  //If it is, see if after jump back it's still in range
-                    if(num > starting_address_int){
+            if (num < starting_address_int && num > ending_address_int)
+            { //See if the characters are out of bounds
+                if (num < 0)
+                {                                           //If it's a negative number it may be jumping back
+                    num = ConvertToInt(addresses[i]) - num; //If it is, see if after jump back it's still in range
+                    if (num > starting_address_int)
+                    {
                         continue;
                     }
-                }if(num > 0){
+                }
+                if (num > 0)
+                {
                     num = ConvertToInt(addresses[i]) + num;
-                    if(num < ending_address_int){
+                    if (num < ending_address_int)
+                    {
                         continue;
                     }
                 }
                 cout << "Out of program memory space\n";
                 exit(EXIT_FAILURE);
             }
-        }else if(objectCodes[i].size() == 8){          //If it's format 4 get the last 4 characters
-            tmp = objectCodes[i].substr(6,8);
+        }
+        else if (objectCodes[i].size() == 8)
+        { //If it's format 4 get the last 4 characters
+            tmp = objectCodes[i].substr(6, 8);
             int num = ConvertToInt(tmp);
-            if(num < starting_address_int && num > ending_address_int){   //See if the characters are out of bounds
-                if(num < 0){
+            if (num < starting_address_int && num > ending_address_int)
+            { //See if the characters are out of bounds
+                if (num < 0)
+                {
                     num = ConvertToInt(addresses[i]) - num;
-                    if(num > starting_address_int){
+                    if (num > starting_address_int)
+                    {
                         continue;
                     }
-                }if(num > 0){
+                }
+                if (num > 0)
+                {
                     num = ConvertToInt(addresses[i]) + num;
-                    if(num < ending_address_int){
+                    if (num < ending_address_int)
+                    {
                         continue;
                     }
                 }
@@ -141,9 +161,6 @@ void MemoryMapping(string* addresses, string* objectCodes){
 
 int main(int argc, char **argv)
 {
-    vector<string> headerNames;
-    vector<string> headerAddresses;
-    vector<string> lengths;
     Estab est;
     for (int clIdx = 1; clIdx < argc; clIdx++)
     {
@@ -161,10 +178,10 @@ int main(int argc, char **argv)
         string headerAddress;
         string textRecordAddress;
         string textRecordLength;
-        unordered_map<string, char> extMap;
+        map<string, char> extMap;
         string extrefs;
         set<int> s1;
-        string fileName = argv[clIdx];
+        char *fileName = argv[clIdx];
 
         ifstream myfile(fileName);
 
@@ -285,8 +302,13 @@ int main(int argc, char **argv)
                 // Lines that declare variables
                 else if (symbol.size() != 0 && objectCode.size() == 0)
                 {
-                    for (auto &[key, value] : extMap)
+                    map<string, char>::iterator it = extMap.begin();
+
+                    while (it != extMap.end())
                     {
+                        string key = it->first;
+                        char value = it->second;
+
                         if (value == 'R')
                         {
                             int index = argument.find(key);
@@ -326,6 +348,8 @@ int main(int argc, char **argv)
                                 }
                             }
                         }
+
+                        it++;
                     }
                 }
 
@@ -333,8 +357,13 @@ int main(int argc, char **argv)
                 else
                 {
                     // Checking extref in text record space
-                    for (auto &[key, value] : extMap)
+                    map<string, char>::iterator it = extMap.begin();
+
+                    while (it != extMap.end())
                     {
+                        string key = it->first;
+                        char value = it->second;
+
                         if (value == 'R')
                         {
                             int index = argument.find(key);
@@ -355,6 +384,8 @@ int main(int argc, char **argv)
                                 }
                             }
                         }
+
+                        it++;
                     }
                 }
 
@@ -384,8 +415,9 @@ int main(int argc, char **argv)
             AddTR(objectCodes, addresses, s1, symbols.at(0), &obj);
             string outputFile = headerName + ".obj";
             obj.WriteToFile(outputFile);
-            est.PutIntoEstab(headerName, "",headerAddress, bytesstring);
-            for(int i = 0; i < EXDEFS.size(); i++){
+            est.PutIntoEstab(headerName, "", headerAddress, bytesstring);
+            for (int i = 0; i < EXDEFS.size(); i++)
+            {
                 est.PutIntoEstab(headerName, EXDEFS[i], EXDEFaddresses[i]);
             }
             myfile.close();
