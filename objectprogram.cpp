@@ -1,4 +1,4 @@
-  
+
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -76,7 +76,7 @@ void ObjectProgram::AddModificationRecord(string symbol, string address, string 
     ModificationRecordList.push_back(ModificationRecord(symbol, address, format, sign));
 }
 
-void ObjectProgram::WriteToFile(string filename, string line, string action)
+void ObjectProgram::WriteToFile(char *filename, string line, string action)
 {
     char carrot = '^';
     ofstream myfile;
@@ -94,7 +94,8 @@ void ObjectProgram::WriteToFile(string filename, string line, string action)
     myfile << "\nR";
     for (int i = 0; i < vectorEXTREF.size(); i++)
     {
-        myfile << carrot << vectorEXTREF.at(i);
+        string curr = vectorEXTREF.at(i);
+        myfile << carrot << curr;
     }
 
     //Text Record order is in Vector

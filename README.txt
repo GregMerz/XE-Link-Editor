@@ -1,4 +1,4 @@
-Members: Cameron Burley(cssc3770) & Greg Munz(cssc3707)
+Members: Cameron Burley(cssc3770) & Greg Merz(cssc3707)
 Class: CS 530, Spring 2021
 Assignment: Assigmnet #2, Linkage editor
 

@@ -81,10 +81,10 @@ void Estab::PrintEstab()
 {
     cout << "Control Section     | Symbol Name        | Address            |Length" << endl;
 
-    for (string curr : hvector)
+    for (int i = 0; i < hvector.size(); i++)
     {
-        Info infocurr = hmap.at(curr);
-        cout << curr;
+        Info infocurr = hmap.at(hvector.at(i));
+        cout << hvector.at(i);
         cout << setw(41) << setfill(' ') << infocurr.address;
         cout << setw(18) << setfill(' ') << infocurr.length << endl;
 

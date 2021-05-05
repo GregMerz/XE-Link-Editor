@@ -413,7 +413,11 @@ int main(int argc, char **argv)
 
             obj.SetLength(bytesstring);
             AddTR(objectCodes, addresses, s1, symbols.at(0), &obj);
-            string outputFile = headerName + ".obj";
+
+            string output = headerName + ".obj";
+            char outputFile[output.length() + 1];
+            strcpy(outputFile, headerName.c_str());
+
             obj.WriteToFile(outputFile);
             est.PutIntoEstab(headerName, "", headerAddress, bytesstring);
             for (int i = 0; i < EXDEFS.size(); i++)
